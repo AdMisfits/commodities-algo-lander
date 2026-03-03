@@ -3,1721 +3,358 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commodities Algo — Automated Futures Trading</title>
+  <title>Commodity Alpha — Institutional Futures Automation</title>
+  
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <!-- Geist Mono fallback via CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/geist@1.2.2/dist/fonts/geist-mono/style.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
   <style>
-    /* ============ RESET ============ */
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      /* Colors - Akari Inspired */
+      --bg: #0b0b0b;
+      --bg-alt: #0e0e0e;
+      --card-bg: #141414;
+      --card-hover: #1a1a1a;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-bright: rgba(255, 255, 255, 0.15);
+      --text: #ffffff;
+      --text-muted: #8a8a8a;
+      --accent: #ffffff;
+      --accent-dim: rgba(255, 255, 255, 0.6);
+      
+      /* Spacing */
+      --section-pad: 140px;
+      --container-max: 1140px;
+      --radius: 12px;
+      --radius-lg: 24px;
+    }
+
+    /* ============ BASE ============ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       font-family: 'Inter', sans-serif;
-      background: #0a0a0a;
-      color: #ffffff;
-      font-size: 18px;
-      line-height: 1.5;
-      letter-spacing: -0.6px;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
     }
-    a { text-decoration: none; color: inherit; }
-    ul, ol { list-style: none; }
-    img { max-width: 100%; display: block; }
+    .container { max-width: var(--container-max); margin: 0 auto; padding: 0 24px; }
+    ul { list-style: none; }
+    a { text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1); }
 
-    /* ============ UTILITIES ============ */
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-    .text-center { text-align: center; }
-    .text-muted { color: #888888; }
-    .text-accent { color: #A8B5C2; }
-
-    .section-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
+    /* ============ UI ATOMS ============ */
+    .label {
       font-family: 'Geist Mono', monospace;
-      font-size: 14px;
+      font-size: 11px;
       font-weight: 500;
-      letter-spacing: -0.6px;
       text-transform: uppercase;
-      color: #cccccc;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 8px 16px;
-      border-radius: 4px;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 6px 16px;
+      border-radius: 100px;
+      display: inline-block;
       margin-bottom: 24px;
-    }
-    .section-label svg { width: 16px; height: 16px; fill: #999; }
-
-    .section-heading {
-      font-family: 'Inter', sans-serif;
-      font-size: clamp(32px, 5vw, 52px);
-      font-weight: 600;
-      line-height: 1.1;
-      letter-spacing: -1.2px;
-      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.02);
     }
 
-    .section-sub {
-      font-size: 17px;
-      color: #999;
-      max-width: 640px;
-      margin: 0 auto 40px;
-      line-height: 1.7;
-    }
-
-    /* White button — for dark sections */
-    .btn-primary {
+    .btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 12px;
-      background: #ffffff;
-      color: #0a0a0a;
-      font-family: 'Geist Mono', monospace;
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: -0.4px;
-      text-transform: uppercase;
-      padding: 14px 28px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
-    }
-    .btn-primary:hover { background: #e0e0e0; transform: translateY(-1px); }
-    .btn-primary svg { width: 16px; height: 16px; transition: transform 0.3s; }
-    .btn-primary:hover svg { transform: translateX(4px); }
-
-    /* Black button — for light sections */
-    .btn-dark {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: #0a0a0a;
-      color: #ffffff;
-      font-family: 'Geist Mono', monospace;
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: -0.4px;
-      text-transform: uppercase;
-      padding: 14px 28px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
-    }
-    .btn-dark:hover { background: #222; transform: translateY(-1px); }
-    .btn-dark svg { width: 16px; height: 16px; transition: transform 0.3s; }
-    .btn-dark:hover svg { transform: translateX(4px); }
-
-    /* Outline — for dark sections */
-    .btn-outline {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: transparent;
-      color: #ffffff;
-      font-family: 'Geist Mono', monospace;
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: -0.4px;
-      text-transform: uppercase;
-      padding: 14px 28px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.3s, color 0.3s;
-    }
-    .btn-outline:hover { background: #ffffff; color: #0a0a0a; }
-    .btn-outline svg { width: 16px; height: 16px; transition: transform 0.3s; }
-    .btn-outline:hover svg { transform: translateX(4px); }
-
-    .arrow-icon {
-      width: 16px; height: 16px;
-    }
-
-    /* ============ NAVBAR ============ */
-    .navbar {
-      position: fixed;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-      background: rgba(51, 51, 51, 0.6);
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      padding: 8px 8px 8px 14px;
-      display: flex;
-      align-items: center;
-      gap: 40px;
-    }
-    .navbar-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: 'Geist Mono', monospace;
+      padding: 18px 36px;
+      border-radius: 100px;
       font-size: 15px;
-      font-weight: 500;
-      letter-spacing: -0.4px;
-      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
     }
-    .navbar-logo svg { width: 28px; height: 28px; fill: #ffffff; }
-    .navbar-links { display: flex; gap: 28px; }
-    .navbar-links a {
-      font-size: 14px;
-      color: #ccc;
-      transition: color 0.2s;
+    .btn-primary { background: #fff; color: #000; }
+    .btn-primary:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(255,255,255,0.2); }
+    .btn-secondary { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); color: #fff; }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--border-bright); }
+
+    /* ============ NAV ============ */
+    .nav {
+      position: fixed;
+      top: 24px; left: 50%; transform: translateX(-50%);
+      width: calc(100% - 48px);
+      max-width: 1000px;
+      height: 72px;
+      z-index: 1000;
+      background: rgba(11, 11, 11, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px 0 32px;
     }
-    .navbar-links a:hover { color: #fff; }
-    .navbar-cta .btn-primary { padding: 10px 20px; font-size: 12px; }
+    .nav-logo { font-weight: 800; font-size: 18px; letter-spacing: -0.05em; }
+    .nav-links { display: flex; gap: 32px; margin: 0 auto; }
+    .nav-links a { font-size: 14px; font-weight: 500; color: var(--text-muted); }
+    .nav-links a:hover { color: #fff; }
+    .nav-cta { height: 48px; padding: 0 24px; border-radius: 100px; font-size: 13px; font-weight: 600; background: #fff; color: #000; display: flex; align-items: center; }
 
     /* ============ HERO ============ */
     .hero {
-      padding: 180px 0 80px;
+      padding: 220px 0 120px;
       text-align: center;
-      background: #0a0a0a;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: -200px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 800px;
-      height: 800px;
-      background: radial-gradient(circle, rgba(168,181,194,0.06) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .hero .section-label { margin-bottom: 32px; }
-    .hero-heading {
-      font-family: 'Inter', sans-serif;
-      font-size: clamp(40px, 5.5vw, 60px);
-      font-weight: 600;
-      line-height: 1.1;
-      letter-spacing: -1.2px;
-      margin-bottom: 24px;
-      max-width: 900px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .hero-sub {
-      font-size: 18px;
-      color: #999;
-      max-width: 600px;
-      margin: 0 auto 16px;
-      line-height: 1.7;
-    }
-    .hero-sub strong { color: #fff; }
-    .hero-cta { margin-top: 40px; }
-
-    /* Hero dashboard mockup */
-    .hero-dashboard {
-      margin: 60px auto 0;
-      max-width: 960px;
-      background: #111;
-      border: 1px solid #1a1a1a;
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-    }
-    .dashboard-bar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 20px;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    .dashboard-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-    }
-    .dashboard-dot.red { background: #ff5f57; }
-    .dashboard-dot.yellow { background: #febc2e; }
-    .dashboard-dot.green { background: #28c840; }
-    .dashboard-content {
-      padding: 32px;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 20px;
-    }
-    .dash-card {
-      background: #0d0d0d;
-      border: 1px solid #1a1a1a;
-      border-radius: 8px;
-      padding: 20px;
-    }
-    .dash-card-label {
-      font-family: 'Geist Mono', monospace;
-      font-size: 10px;
-      letter-spacing: -0.4px;
-      text-transform: uppercase;
-      color: #666;
-      margin-bottom: 8px;
-    }
-    .dash-card-value {
-      font-family: 'Inter', sans-serif;
-      font-size: 28px;
-      font-weight: 700;
-    }
-    .dash-card-value.positive { color: #28c840; }
-    .dash-card-value.accent { color: #A8B5C2; }
-    .dash-chart {
-      grid-column: 1 / -1;
-      background: #0d0d0d;
-      border: 1px solid #1a1a1a;
-      border-radius: 8px;
-      padding: 24px;
-      height: 200px;
-      position: relative;
-      overflow: hidden;
-    }
-    .dash-chart-label {
-      font-family: 'Geist Mono', monospace;
-      font-size: 10px;
-      letter-spacing: -0.4px;
-      text-transform: uppercase;
-      color: #666;
-      margin-bottom: 16px;
-    }
-    .chart-line {
-      position: absolute;
-      bottom: 24px;
-      left: 24px;
-      right: 24px;
-      height: 120px;
-    }
-    .chart-line svg { width: 100%; height: 100%; }
-
-    /* ============ SOCIAL PROOF BAR ============ */
-    .social-proof-bar {
-      padding: 60px 0;
-      border-top: 1px solid #151515;
-      border-bottom: 1px solid #151515;
-      text-align: center;
-    }
-    .social-proof-bar p {
-      font-family: 'Geist Mono', monospace;
-      font-size: 13px;
-      letter-spacing: -0.4px;
-      text-transform: uppercase;
-      color: #666;
-      margin-bottom: 32px;
-    }
-    .logo-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 60px;
-      flex-wrap: wrap;
-      opacity: 0.5;
-    }
-    .logo-row span {
-      font-family: 'Inter', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -0.4px;
-    }
-
-    /* ============ VALUE PROPS (3-col light) ============ */
-    .value-props {
-      padding: 100px 0;
-      background: #E8E8E8;
-      color: #0a0a0a;
-    }
-    .value-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: #ddd;
-      border: 1px solid #ddd;
-      margin-top: 48px;
-    }
-    .value-card {
-      background: #E8E8E8;
-      padding: 40px 32px;
-      position: relative;
-    }
-    .value-card-icon {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 20px;
-    }
-    .value-card-icon svg { width: 100%; height: 100%; fill: none; stroke: #A8B5C2; stroke-width: 1.5; }
-    .value-card h3 {
-      font-family: 'Inter', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: #0a0a0a;
-    }
-    .value-card p {
-      font-size: 15px;
-      color: #666;
-      line-height: 1.7;
-    }
-    /* Plus corners */
-    .value-card::before {
-      content: '+';
-      position: absolute;
-      top: -8px;
-      left: -8px;
-      font-family: 'Geist Mono', monospace;
-      font-size: 14px;
-      color: #bbb;
-    }
-    .value-card:first-child::before { display: none; }
-
-    /* ============ ABOUT / HOW IT WORKS ============ */
-    .about-section {
-      padding: 120px 0;
-      background: #E8E8E8;
-      color: #0a0a0a;
-    }
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: center;
-    }
-    .about-section .section-label { border-color: #ccc; color: #888; }
-    .about-section .section-heading { color: #0a0a0a; }
-    .about-section .section-sub { color: #666; margin: 0 0 40px; }
-    .about-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-top: 40px;
-    }
-    .stat-block {}
-    .stat-value {
-      font-family: 'Inter', sans-serif;
-      font-size: 42px;
-      font-weight: 700;
-      color: #0a0a0a;
-    }
-    .stat-label {
-      font-family: 'Geist Mono', monospace;
-      font-size: 11px;
-      letter-spacing: -0.4px;
-      text-transform: uppercase;
-      color: #999;
-      margin-top: 4px;
-    }
-    .about-list { margin-top: 32px; }
-    .about-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 10px 0;
-      font-size: 15px;
-      color: #444;
-    }
-    .about-list li svg {
-      width: 20px; height: 20px; fill: #A8B5C2; flex-shrink: 0; margin-top: 2px;
-    }
-
-    /* ============ PAIN POINTS ============ */
-    .pain-section {
-      padding: 120px 0;
-      background: #E8E8E8;
-      color: #0a0a0a;
-      text-align: center;
-    }
-    .pain-section .section-label { border-color: #ccc; color: #888; }
-    .pain-section .section-heading { color: #0a0a0a; }
-    .pain-section .section-sub { color: #666; }
-    .pain-section .section-sub strong { color: #0a0a0a; }
-    .pain-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: #ddd;
-      border: 1px solid #ddd;
-      margin-top: 48px;
-      text-align: left;
-    }
-    .pain-card {
-      background: #E8E8E8;
-      padding: 40px 28px;
-      position: relative;
-    }
-    .pain-card::before {
-      content: '+';
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      font-family: 'Geist Mono', monospace;
-      font-size: 14px;
-      color: #bbb;
-    }
-    .pain-card:last-child::before { display: none; }
-    .pain-card h3 {
-      font-family: 'Inter', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: #0a0a0a;
-      margin-bottom: 8px;
-    }
-    .pain-card > p {
-      font-size: 14px;
-      color: #888;
-      margin-bottom: 24px;
-    }
-    .pain-card .pain-illustration {
-      width: 100%;
-      height: 180px;
-      background: #eee;
-      border-radius: 8px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .pain-card .pain-illustration svg { width: 80px; height: 80px; opacity: 0.4; }
-    .pain-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 6px 0;
-      font-size: 14px;
-      color: #555;
-    }
-    .pain-list li svg {
-      width: 18px; height: 18px; fill: #A8B5C2; flex-shrink: 0; margin-top: 2px;
-    }
-
-    /* ============ VIDEO TESTIMONIAL ============ */
-    .video-section {
-      padding: 120px 0;
-      background: #E8E8E8;
-      color: #0a0a0a;
-      text-align: center;
-    }
-    .video-section .section-label { border-color: #ccc; color: #888; }
-    .video-section .section-heading { color: #0a0a0a; }
-    .video-section .section-sub { color: #666; }
-    .video-embed {
-      margin: 48px auto 0;
-      max-width: 900px;
-      aspect-ratio: 16/9;
-      background: #ddd;
-      border-radius: 12px;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .video-embed::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.25);
-    }
-    .play-btn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
-      width: 72px;
-      height: 72px;
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(8px);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .play-btn svg { width: 28px; height: 28px; fill: #fff; margin-left: 4px; }
-
-    /* ============ WHY CHOOSE (dark bg) ============ */
-    .why-section {
-      padding: 120px 0;
-      background: #0a0a0a;
-    }
-    .why-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 60px;
-    }
-    .why-top-text { max-width: 600px; }
-    .why-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-    .why-card {
-      background: #111;
-      border: 1px solid #1a1a1a;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .why-card-img {
-      width: 100%;
-      height: 200px;
-      background: #151515;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .why-card-img svg { width: 64px; height: 64px; opacity: 0.6; }
-    .why-card-body { padding: 24px; }
-    .why-card-body h3 {
-      font-family: 'Inter', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .why-card-body p {
-      font-size: 14px;
-      color: #888;
-      line-height: 1.7;
-    }
-
-    /* ============ RESULTS / STATS ============ */
-    .results-section {
-      padding: 120px 0;
-      background: #0a0a0a;
-    }
-    .results-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 60px;
-      align-items: center;
-    }
-    .results-image {
-      background: #111;
-      border: 1px solid #1a1a1a;
-      border-radius: 12px;
-      height: 400px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .results-image svg { width: 120px; height: 120px; opacity: 0.3; }
-    .results-content {}
-    .salary-bars { margin-top: 40px; }
-    .salary-bar {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    .salary-bar-label {
-      font-family: 'Geist Mono', monospace;
-      font-size: 11px;
-      letter-spacing: -0.4px;
-      text-transform: uppercase;
-      color: #888;
-      min-width: 140px;
-    }
-    .salary-bar-track {
-      flex: 1;
-      height: 8px;
-      background: #1a1a1a;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .salary-bar-fill {
-      height: 100%;
-      background: #ffffff;
-      border-radius: 4px;
-    }
-    .salary-bar-value {
-      font-family: 'Inter', sans-serif;
-      font-size: 24px;
-      font-weight: 700;
-      min-width: 100px;
-      text-align: right;
-    }
-
-    /* ============ TESTIMONIALS ============ */
-    .testimonials-section {
-      padding: 120px 0;
-      background: #0a0a0a;
-    }
-    .testimonials-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-top: 60px;
-    }
-    .testimonial-card {
-      background: #111;
-      border: 1px solid #1a1a1a;
-      border-radius: 12px;
-      padding: 32px;
-    }
-    .testimonial-card .quote-icon {
-      width: 32px; height: 32px; fill: #555; margin-bottom: 20px;
-    }
-    .testimonial-card blockquote {
-      font-size: 15px;
-      color: #ccc;
-      line-height: 1.7;
-      margin-bottom: 24px;
-      font-style: italic;
-    }
-    .testimonial-author {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .testimonial-avatar {
-      width: 40px;
-      height: 40px;
-      background: #222;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Geist Mono', monospace;
-      font-size: 14px;
-      font-weight: 700;
-      color: #fff;
-    }
-    .testimonial-name {
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .testimonial-role {
-      font-size: 12px;
-      color: #888;
-    }
-
-    /* ============ HOW IT WORKS ============ */
-    .how-section {
-      padding: 120px 0;
-      background: #E8E8E8;
-      color: #0a0a0a;
-    }
-    .how-section .section-label { border-color: #ccc; color: #888; }
-    .how-section .section-heading { color: #0a0a0a; }
-    .how-section .section-sub { color: #666; }
-    .how-steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 40px;
-      margin-top: 60px;
-      counter-reset: step;
-    }
-    .how-step {
-      counter-increment: step;
-      position: relative;
-    }
-    .how-step::before {
-      content: counter(step, decimal-leading-zero);
-      font-family: 'Inter', sans-serif;
-      font-size: 64px;
-      font-weight: 700;
-      color: #D0D8DE;
-      display: block;
-      margin-bottom: 16px;
-    }
-    .how-step h3 {
-      font-family: 'Inter', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      color: #0a0a0a;
-      margin-bottom: 12px;
-    }
-    .how-step p {
-      font-size: 15px;
-      color: #666;
-      line-height: 1.7;
-    }
-
-    /* ============ MARKETS MARQUEE ============ */
-    .markets-section {
-      padding: 80px 0;
-      background: #0a0a0a;
-      overflow: hidden;
-    }
-    .marquee-track {
-      display: flex;
-      gap: 24px;
-      animation: marqueeScroll 25s linear infinite;
-    }
-    .marquee-item {
-      flex-shrink: 0;
-      padding: 12px 28px;
-      background: #111;
-      border: 1px solid #1a1a1a;
-      border-radius: 100px;
-      font-family: 'Geist Mono', monospace;
-      font-size: 13px;
-      letter-spacing: -0.4px;
-      text-transform: uppercase;
-      color: #888;
-      white-space: nowrap;
-    }
-    @keyframes marqueeScroll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
-    /* ============ PRICING ============ */
-    .pricing-section {
-      padding: 120px 0;
-      background: #0a0a0a;
-      text-align: center;
-    }
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-      max-width: 800px;
-      margin: 60px auto 0;
-    }
-    .pricing-card {
-      background: #111;
-      border: 1px solid #1a1a1a;
-      border-radius: 12px;
-      padding: 40px 32px;
-      text-align: left;
-      position: relative;
-    }
-    .pricing-card.featured { border-color: rgba(255, 255, 255, 0.3); }
-    .pricing-card.featured::before {
-      content: 'MOST POPULAR';
-      position: absolute;
-      top: -12px;
-      left: 32px;
-      font-family: 'Geist Mono', monospace;
-      font-size: 10px;
-      letter-spacing: -0.4px;
-      background: #ffffff;
-      color: #0a0a0a;
-      padding: 4px 12px;
-      font-weight: 700;
-    }
-    .pricing-tier {
-      font-family: 'Geist Mono', monospace;
-      font-size: 11px;
-      letter-spacing: -0.4px;
-      text-transform: uppercase;
-      color: #888;
-      margin-bottom: 16px;
-    }
-    .pricing-price {
-      font-family: 'Inter', sans-serif;
-      font-size: 48px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .pricing-price span {
-      font-size: 18px;
-      color: #666;
+      background: radial-gradient(circle at 50% -10%, rgba(255,255,255,0.1) 0%, transparent 60%);
+    }
+    .hero h1 {
+      font-size: clamp(48px, 8vw, 84px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.05em;
+      margin-bottom: 28px;
+      max-width: 1000px;
+      margin-inline: auto;
+    }
+    .hero p {
+      font-size: clamp(18px, 2.5vw, 21px);
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 52px;
       font-weight: 400;
     }
-    .pricing-desc {
-      font-size: 14px;
-      color: #888;
-      margin-bottom: 32px;
-      line-height: 1.6;
-    }
-    .pricing-features { margin-bottom: 32px; }
-    .pricing-features li {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 0;
-      font-size: 14px;
-      color: #ccc;
-    }
-    .pricing-features li svg { width: 18px; height: 18px; fill: #A8B5C2; flex-shrink: 0; }
-    .pricing-card .btn-primary { width: 100%; justify-content: center; }
-    .pricing-card .btn-outline { width: 100%; justify-content: center; }
+    .hero-social { margin-top: 80px; opacity: 0.5; }
+    .hero-social p { font-size: 11px; font-family: 'Geist Mono'; text-transform: uppercase; margin-bottom: 24px; }
+    .social-logos { display: flex; justify-content: center; gap: 48px; font-weight: 700; font-size: 20px; letter-spacing: -0.05em; filter: grayscale(1); }
 
-    /* ============ FAQ ============ */
-    .faq-section {
-      padding: 120px 0;
-      background: #0a0a0a;
+    /* ============ BENTO GRID ============ */
+    .bento { padding: var(--section-pad) 0; }
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 380px);
+      gap: 24px;
+      margin-top: 64px;
     }
-    .faq-list {
-      max-width: 700px;
-      margin: 60px auto 0;
-    }
-    .faq-item {
-      border-bottom: 1px solid #1a1a1a;
-    }
-    .faq-question {
+    .bento-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 48px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px 0;
-      cursor: pointer;
-      background: none;
-      border: none;
-      width: 100%;
-      text-align: left;
-      color: #fff;
-      font-family: 'Inter', sans-serif;
-      font-size: 17px;
-      font-weight: 600;
-    }
-    .faq-question svg {
-      width: 20px; height: 20px; fill: #666;
-      transition: transform 0.3s;
-      flex-shrink: 0;
-    }
-    .faq-item.active .faq-question svg { transform: rotate(45deg); }
-    .faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease;
-    }
-    .faq-item.active .faq-answer { max-height: 300px; }
-    .faq-answer p {
-      padding-bottom: 24px;
-      font-size: 15px;
-      color: #888;
-      line-height: 1.7;
-    }
-
-    /* ============ FINAL CTA ============ */
-    .final-cta {
-      padding: 120px 0;
-      background: #0a0a0a;
-      text-align: center;
+      flex-direction: column;
+      justify-content: flex-end;
       position: relative;
       overflow: hidden;
+      transition: border-color 0.4s ease;
     }
-    .final-cta::before {
-      content: '';
+    .bento-card:hover { border-color: var(--border-bright); }
+    .bento-card h3 { font-size: 24px; margin-bottom: 12px; }
+    .bento-card p { color: var(--text-muted); font-size: 15px; }
+    .bento-card.span-2 { grid-column: span 2; }
+    .bento-card.tall { grid-row: span 2; }
+    
+    /* Visual Placeholder in Bento */
+    .bento-visual {
       position: absolute;
-      bottom: -200px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(168,181,194,0.08) 0%, transparent 70%);
-      pointer-events: none;
+      top: 0; left: 0; right: 0; height: 55%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border);
     }
-    .final-cta .section-heading { margin-bottom: 16px; }
+
+    /* ============ STRATEGY MODULES (AKARI LIST STYLE) ============ */
+    .strategy { padding: var(--section-pad) 0; background: #070707; }
+    .strategy-list { margin-top: 80px; }
+    .strategy-item {
+      display: grid;
+      grid-template-columns: 80px 1fr 300px;
+      gap: 48px;
+      padding: 60px 0;
+      border-top: 1px solid var(--border);
+      align-items: start;
+    }
+    .strategy-num { font-family: 'Geist Mono'; font-size: 14px; color: #333; }
+    .strategy-content h3 { font-size: 32px; font-weight: 700; margin-bottom: 16px; }
+    .strategy-content p { color: var(--text-muted); font-size: 17px; max-width: 520px; }
+    .strategy-footer { font-family: 'Geist Mono'; font-size: 11px; text-transform: uppercase; color: #444; margin-top: 24px; }
+    .strategy-visual { height: 180px; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); }
+
+    /* ============ DEMO CTA ============ */
+    .demo-cta { padding: var(--section-pad) 0; text-align: center; }
+    .demo-cta h2 { font-size: 56px; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 20px; }
+    .demo-cta p { color: var(--text-muted); font-size: 18px; max-width: 520px; margin: 0 auto 48px; }
 
     /* ============ FOOTER ============ */
-    .footer {
-      padding: 60px 0 32px;
-      background: #0a0a0a;
-      border-top: 1px solid #151515;
-    }
-    .footer-top {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      gap: 60px;
-      margin-bottom: 48px;
-    }
-    .footer-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: 'Geist Mono', monospace;
-      font-size: 15px;
-      font-weight: 500;
-      letter-spacing: -0.4px;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-    .footer-brand svg { width: 24px; height: 24px; fill: #ffffff; }
-    .footer-tagline { font-size: 14px; color: #666; }
-    .footer h4 {
-      font-family: 'Inter', sans-serif;
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
-    .footer-links li { margin-bottom: 10px; }
-    .footer-links a { font-size: 14px; color: #888; transition: color 0.2s; }
-    .footer-links a:hover { color: #fff; }
-    .footer-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 32px;
-      border-top: 1px solid #151515;
-      font-size: 13px;
-      color: #555;
-    }
-    .footer-legal a {
-      color: #555;
-      margin-left: 24px;
-      transition: color 0.2s;
-    }
-    .footer-legal a:hover { color: #888; }
+    .footer { padding: 120px 0 60px; border-top: 1px solid var(--border); background: #050505; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 80px; margin-bottom: 100px; }
+    .footer-brand h2 { font-weight: 800; font-size: 24px; margin-bottom: 20px; }
+    .footer-brand p { color: var(--text-muted); font-size: 15px; max-width: 320px; }
+    .footer-col h4 { font-family: 'Geist Mono'; font-size: 11px; text-transform: uppercase; color: #444; margin-bottom: 32px; }
+    .footer-col ul li { margin-bottom: 16px; font-size: 14px; color: var(--text-muted); }
+    .footer-bottom { border-top: 1px solid var(--border); padding-top: 60px; display: flex; justify-content: space-between; font-size: 12px; color: #333; font-family: 'Geist Mono'; }
 
     /* ============ RESPONSIVE ============ */
-    @media (max-width: 968px) {
-      .navbar-links { display: none; }
-      .about-grid, .results-grid { grid-template-columns: 1fr; gap: 40px; }
-      .value-grid, .pain-grid, .why-grid, .testimonials-grid, .how-steps {
-        grid-template-columns: 1fr;
-      }
-      .pricing-grid { grid-template-columns: 1fr; }
-      .dashboard-content { grid-template-columns: 1fr; }
-      .footer-top { grid-template-columns: 1fr; gap: 32px; }
-      .why-top { flex-direction: column; gap: 24px; }
+    @media (max-width: 1000px) {
+      .nav-links { display: none; }
+      .strategy-item { grid-template-columns: 60px 1fr; }
+      .strategy-visual { display: none; }
+      .bento-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+      .bento-card.span-2 { grid-column: span 1; }
+      .footer-grid { grid-template-columns: 1fr; gap: 48px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ========== NAVBAR ========== -->
-  <nav class="navbar">
-    <a href="#" class="navbar-logo">
-      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-      <span>[Algo Name]</span>
-    </a>
-    <div class="navbar-links">
-      <a href="#how-it-works">How It Works</a>
-      <a href="#results">Results</a>
-      <a href="#markets">Markets</a>
-      <a href="#testimonials">Testimonials</a>
-      <a href="#pricing">Pricing</a>
+  <nav class="nav">
+    <div class="nav-logo">COMMODITY ALPHA</div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#strategy">Strategy</a>
+      <a href="#demo">Book a Demo</a>
       <a href="#faq">FAQ</a>
     </div>
-    <div class="navbar-cta">
-      <a href="#pricing" class="btn-primary">
-        Get Started
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-    </div>
+    <a href="#demo" class="nav-cta">Book a Demo</a>
   </nav>
 
-  <main>
-
-    <!-- ========== HERO ========== -->
-    <section class="hero">
-      <div class="container">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          Gold up 47% this year. Silver up 39%.
-        </div>
-        <h1 class="hero-heading">An Algorithm That Trades Commodities While You Sleep</h1>
-        <p class="hero-sub">
-          Automated futures trading across gold, silver, and oil. Our algo identifies momentum shifts and executes trades 24/5 — <strong>no screen time required.</strong>
-        </p>
-        <div class="hero-cta">
-          <a href="#pricing" class="btn-primary">
-            See Live Results
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-
-        <!-- Dashboard Mockup -->
-        <div class="hero-dashboard">
-          <div class="dashboard-bar">
-            <div class="dashboard-dot red"></div>
-            <div class="dashboard-dot yellow"></div>
-            <div class="dashboard-dot green"></div>
-          </div>
-          <div class="dashboard-content">
-            <div class="dash-card">
-              <div class="dash-card-label">Monthly Return</div>
-              <div class="dash-card-value positive">+12.4%</div>
-            </div>
-            <div class="dash-card">
-              <div class="dash-card-label">Win Rate</div>
-              <div class="dash-card-value accent">73%</div>
-            </div>
-            <div class="dash-card">
-              <div class="dash-card-label">Active Positions</div>
-              <div class="dash-card-value">3</div>
-            </div>
-            <div class="dash-chart">
-              <div class="dash-chart-label">Equity Curve — Last 12 Months</div>
-              <div class="chart-line">
-                <svg viewBox="0 0 800 120" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.2"/>
-                      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-                    </linearGradient>
-                  </defs>
-                  <path d="M0,100 Q50,95 100,85 T200,70 T300,55 T400,60 T500,40 T600,30 T700,20 T800,5" fill="none" stroke="#ffffff" stroke-width="2.5"/>
-                  <path d="M0,100 Q50,95 100,85 T200,70 T300,55 T400,60 T500,40 T600,30 T700,20 T800,5 L800,120 L0,120 Z" fill="url(#chartGrad)"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
+  <header class="hero">
+    <div class="container">
+      <div class="label">Live Performance: +18.4% Net Return Q1</div>
+      <h1>Capture the Momentum.<br>Hands-off.</h1>
+      <p>Institutional-grade futures automation for Gold, Silver, and Crude Oil. Remove the emotion, capture the breakout, trade 24/5.</p>
+      <div class="hero-actions">
+        <a href="#demo" class="btn btn-primary">Book a Demo</a>
+        <a href="#strategy" class="btn btn-secondary" style="margin-left: 12px;">The Strategy</a>
       </div>
-    </section>
-
-    <!-- ========== SOCIAL PROOF BAR ========== -->
-    <section class="social-proof-bar">
-      <div class="container">
-        <p>Trusted by traders managing $50M+ in combined AUM</p>
-        <div class="logo-row">
+      <div class="hero-social">
+        <p>Trusted by traders at</p>
+        <div class="social-logos">
           <span>NinjaTrader</span>
-          <span>TradingView</span>
           <span>CME Group</span>
-          <span>Rithmic</span>
+          <span>Tradovate</span>
           <span>CQG</span>
+          <span>TradingView</span>
         </div>
       </div>
-    </section>
+    </div>
+  </header>
 
-    <!-- ========== VALUE PROPS ========== -->
-    <section class="value-props">
-      <div class="container">
-        <div class="text-center">
-          <div class="section-label">
-            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-            Why this algo
-          </div>
+  <section id="features" class="bento">
+    <div class="container">
+      <div class="label">Features</div>
+      <h2 style="font-size: 48px; max-width: 600px; margin-bottom: 40px;">Engineered for the 24-hour cycle.</h2>
+      <div class="bento-grid">
+        <div class="bento-card span-2">
+          <div class="bento-visual"></div>
+          <h3>Multi-Session Execution</h3>
+          <p>The largest commodity moves happen during the London open. Alpha captures global volatility while you sleep.</p>
         </div>
-        <div class="value-grid">
-          <div class="value-card">
-            <div class="value-card-icon">
-              <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20"/><path d="M16 24l6 6 12-12"/></svg>
-            </div>
-            <h3>Fully Automated Execution</h3>
-            <p>Set it up once. The algo scans, enters, and exits trades for you across gold, silver, and crude oil futures — 24 hours a day, 5 days a week.</p>
-          </div>
-          <div class="value-card">
-            <div class="value-card-icon">
-              <svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="4"/><path d="M16 32V22M24 32V16M32 32V20"/></svg>
-            </div>
-            <h3>Built for This Commodity Cycle</h3>
-            <p>Gold and silver are in a historic breakout. This algo was specifically designed to capture momentum in trending commodity markets — not crypto, not stocks.</p>
-          </div>
-          <div class="value-card">
-            <div class="value-card-icon">
-              <svg viewBox="0 0 48 48"><path d="M24 4v40M4 24h40M10 10l28 28M38 10L10 38"/></svg>
-            </div>
-            <h3>Institutional-Grade Risk Controls</h3>
-            <p>Hard stop losses on every trade. Max daily drawdown limits. Position sizing that scales with your account — not against it.</p>
-          </div>
+        <div class="bento-card tall">
+          <div class="bento-visual"></div>
+          <h3>Verified Performance</h3>
+          <p>Real-time PnL tracking and monthly reports. Full transparency on every fill, exit, and drawdown period.</p>
+        </div>
+        <div class="bento-card">
+          <div class="bento-visual"></div>
+          <h3>Institutional Risk</h3>
+          <p>Hard-coded stops and max daily loss limits that protect your capital above all else.</p>
+        </div>
+        <div class="bento-card span-2">
+          <div class="bento-visual"></div>
+          <h3>Concierge Onboarding</h3>
+          <p>We handle the technical setup for you. Link your broker and be live in under 20 minutes.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ========== ABOUT SECTION ========== -->
-    <section class="about-section" id="how-it-works">
-      <div class="container">
-        <div class="about-grid">
-          <div>
-            <div class="section-label">
-              <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#A8B5C2"/></svg>
-              About the algorithm
-            </div>
-            <h2 class="section-heading">Catch the biggest moves in commodities. Automatically.</h2>
-            <p class="section-sub">
-              Our algorithm uses momentum-based signals combined with volatility filters to identify high-probability entries in gold, silver, and crude oil futures.
-            </p>
-            <div class="about-stats">
-              <div class="stat-block">
-                <div class="stat-value">3+</div>
-                <div class="stat-label">Years backtested</div>
-              </div>
-              <div class="stat-block">
-                <div class="stat-value">73%</div>
-                <div class="stat-label">Win rate</div>
-              </div>
-              <div class="stat-block">
-                <div class="stat-value">2.4:1</div>
-                <div class="stat-label">Reward-to-risk</div>
-              </div>
-              <div class="stat-block">
-                <div class="stat-value">$25K</div>
-                <div class="stat-label">Min. account size</div>
-              </div>
-            </div>
+  <section id="strategy" class="strategy">
+    <div class="container">
+      <div class="label">Strategy Modules</div>
+      <h2 style="font-size: 48px; margin-bottom: 20px;">Automated Alpha.</h2>
+      <p style="color: var(--text-muted); font-size: 18px; max-width: 500px;">How the algorithm identifies and executes institutional-grade entries across futures markets.</p>
+      
+      <div class="strategy-list">
+        <div class="strategy-item">
+          <div class="strategy-num">01</div>
+          <div class="strategy-content">
+            <h3>VWAP Accumulation Filters</h3>
+            <p>Identifying institutional buy zones by analyzing volume-weighted price action divergence in Gold and Oil.</p>
+            <div class="strategy-footer">Includes: Volume Analysis • Delta Flow</div>
           </div>
-          <div>
-            <p style="font-size:15px; color:#666; margin-bottom:24px;">
-              The algorithm identifies momentum shifts in commodities futures using a proprietary blend of price action, volume analysis, and volatility breakout signals.
-            </p>
-            <p style="font-size:15px; color:#444; margin-bottom:24px;">
-              By the time you install it, you'll have:
-            </p>
-            <ul class="about-list">
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                A fully automated system trading gold, silver, and crude oil
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Hard risk limits protecting your capital on every trade
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Real-time trade notifications sent to your phone
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Access to a private community of commodity traders
-              </li>
-            </ul>
+          <div class="strategy-visual"></div>
+        </div>
+
+        <div class="strategy-item">
+          <div class="strategy-num">02</div>
+          <div class="strategy-content">
+            <h3>Volatility Breakout Logic</h3>
+            <p>The system remains flat during sideways "chop" and only enters when momentum crosses our proprietary volatility threshold.</p>
+            <div class="strategy-footer">Includes: Range Filtering • Momentum Thresholds</div>
           </div>
+          <div class="strategy-visual"></div>
+        </div>
+
+        <div class="strategy-item">
+          <div class="strategy-num">03</div>
+          <div class="strategy-content">
+            <h3>Dynamic Trailing Protection</h3>
+            <p>Automated profit taking and trailing stops that scale as the trade moves in your favor, locking in gains automatically.</p>
+            <div class="strategy-footer">Includes: ATR Trailing • Partial Fills</div>
+          </div>
+          <div class="strategy-visual"></div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ========== PAIN POINTS ========== -->
-    <section class="pain-section">
-      <div class="container">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="#A8B5C2" stroke-width="1.5"/></svg>
-          Still trading manually?
-        </div>
-        <h2 class="section-heading">The market moves. <br>You shouldn't have to.</h2>
-        <p class="section-sub">
-          Most retail traders lose money because they trade emotionally, enter late, and exit early. <strong>The algo removes all of that.</strong>
-        </p>
-        <div class="pain-grid">
-          <div class="pain-card">
-            <h3>Emotional Trading</h3>
-            <p>Fear and greed are draining your account.</p>
-            <div class="pain-illustration">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2M9 9h.01M15 9h.01"/></svg>
-            </div>
-            <ul class="pain-list">
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Panic-selling at the bottom
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                FOMO-buying at the top
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Moving stop losses "just this once"
-              </li>
-            </ul>
-          </div>
-          <div class="pain-card">
-            <h3>Missed Moves</h3>
-            <p>Gold ripped 3% while you were sleeping.</p>
-            <div class="pain-illustration">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <ul class="pain-list">
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Markets move while you sleep or work
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Can't watch charts 18 hours a day
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Best entries happen at the worst times
-              </li>
-            </ul>
-          </div>
-          <div class="pain-card">
-            <h3>No Edge</h3>
-            <p>Trading without a system is just gambling.</p>
-            <div class="pain-illustration">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-            </div>
-            <ul class="pain-list">
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                No repeatable process for entries/exits
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Jumping between strategies weekly
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Paying for signals that don't work
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
+  <section id="demo" class="demo-cta">
+    <div class="container">
+      <div class="label">Get Started</div>
+      <h2>See It Live.</h2>
+      <p>Walk through the algorithm, review live performance data, and get your questions answered — no commitment.</p>
+      <a href="#demo" class="btn btn-primary">Book a Demo</a>
+    </div>
+  </section>
 
-    <!-- ========== VIDEO TESTIMONIAL ========== -->
-    <section class="video-section">
-      <div class="container">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="#A8B5C2"/></svg>
-          Trader Spotlight
-        </div>
-        <h2 class="section-heading">Watch how Mike replaced his day trading income</h2>
-        <p class="section-sub">
-          From spending 8 hours a day watching charts to checking his phone once in the morning. Hear it in his own words.
-        </p>
-        <div class="video-embed">
-          <div class="play-btn">
-            <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========== WHY CHOOSE ========== -->
-    <section class="why-section" id="markets">
-      <div class="container">
-        <div class="why-top">
-          <div class="why-top-text">
-            <div class="section-label">
-              <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#A8B5C2"/></svg>
-              The edge
-            </div>
-            <h2 class="section-heading">Why this algo. Why now.</h2>
-            <p style="font-size:17px; color:#888; max-width:500px; line-height:1.7;">
-              Commodities are in a supercycle. Central banks are buying gold at record pace. Silver industrial demand is surging. Oil supply is tightening. This algo was built to ride exactly these conditions.
-            </p>
-          </div>
-          <a href="#pricing" class="btn-primary">
-            Get Started
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-        <div class="why-grid">
-          <div class="why-card">
-            <div class="why-card-img">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#A8B5C2" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-            </div>
-            <div class="why-card-body">
-              <h3>Momentum Capture</h3>
-              <p>Designed to catch trending moves in gold, silver, and oil — not chop. The algo sits out when markets are flat.</p>
-            </div>
-          </div>
-          <div class="why-card">
-            <div class="why-card-img">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#A8B5C2" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
-            </div>
-            <div class="why-card-body">
-              <h3>Multi-Market Diversification</h3>
-              <p>Trades across three uncorrelated commodity markets simultaneously. When one is quiet, another is moving.</p>
-            </div>
-          </div>
-          <div class="why-card">
-            <div class="why-card-img">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#A8B5C2" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <div class="why-card-body">
-              <h3>Capital Preservation First</h3>
-              <p>Hard stop on every trade. Max 2% risk per position. Daily loss limits that shut the system down before damage compounds.</p>
-            </div>
-          </div>
-          <div class="why-card">
-            <div class="why-card-img">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#A8B5C2" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <div class="why-card-body">
-              <h3>24/5 Market Coverage</h3>
-              <p>Futures markets trade nearly around the clock. The algo never sleeps, never hesitates, never second-guesses.</p>
-            </div>
-          </div>
-          <div class="why-card">
-            <div class="why-card-img">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#A8B5C2" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            </div>
-            <div class="why-card-body">
-              <h3>Transparent Track Record</h3>
-              <p>Every trade logged. Every fill published. No cherry-picked results — just verified, auditable performance data.</p>
-            </div>
-          </div>
-          <div class="why-card">
-            <div class="why-card-img">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#A8B5C2" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            </div>
-            <div class="why-card-body">
-              <h3>Private Trader Community</h3>
-              <p>Join a group of serious commodity traders. Weekly market breakdowns, algo updates, and direct access to the development team.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========== HOW IT WORKS ========== -->
-    <section class="how-section">
-      <div class="container text-center">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" fill="none" stroke="#A8B5C2" stroke-width="1.5"/></svg>
-          Getting started
-        </div>
-        <h2 class="section-heading">Live in under 30 minutes</h2>
-        <p class="section-sub">
-          No coding. No complex setup. Connect your broker, configure your risk, and the algo handles everything else.
-        </p>
-        <div class="how-steps">
-          <div class="how-step">
-            <h3>Connect Your Broker</h3>
-            <p>Link your NinjaTrader, Rithmic, or CQG-compatible account. We walk you through every step on a live call.</p>
-          </div>
-          <div class="how-step">
-            <h3>Set Your Risk Parameters</h3>
-            <p>Choose your position size, max daily loss, and which markets to trade. The algo respects your limits — always.</p>
-          </div>
-          <div class="how-step">
-            <h3>Turn It On</h3>
-            <p>Hit start. The algo begins scanning gold, silver, and oil for momentum entries. You get notified on every fill.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========== MARKETS MARQUEE ========== -->
-    <section class="markets-section">
-      <div class="marquee-track">
-        <div class="marquee-item">Gold Futures (GC)</div>
-        <div class="marquee-item">Silver Futures (SI)</div>
-        <div class="marquee-item">Crude Oil (CL)</div>
-        <div class="marquee-item">Micro Gold (MGC)</div>
-        <div class="marquee-item">Micro Silver (SIL)</div>
-        <div class="marquee-item">Micro Crude (MCL)</div>
-        <div class="marquee-item">Gold Futures (GC)</div>
-        <div class="marquee-item">Silver Futures (SI)</div>
-        <div class="marquee-item">Crude Oil (CL)</div>
-        <div class="marquee-item">Micro Gold (MGC)</div>
-        <div class="marquee-item">Micro Silver (SIL)</div>
-        <div class="marquee-item">Micro Crude (MCL)</div>
-        <!-- Duplicate for seamless loop -->
-        <div class="marquee-item">Gold Futures (GC)</div>
-        <div class="marquee-item">Silver Futures (SI)</div>
-        <div class="marquee-item">Crude Oil (CL)</div>
-        <div class="marquee-item">Micro Gold (MGC)</div>
-        <div class="marquee-item">Micro Silver (SIL)</div>
-        <div class="marquee-item">Micro Crude (MCL)</div>
-        <div class="marquee-item">Gold Futures (GC)</div>
-        <div class="marquee-item">Silver Futures (SI)</div>
-        <div class="marquee-item">Crude Oil (CL)</div>
-        <div class="marquee-item">Micro Gold (MGC)</div>
-        <div class="marquee-item">Micro Silver (SIL)</div>
-        <div class="marquee-item">Micro Crude (MCL)</div>
-      </div>
-    </section>
-
-    <!-- ========== RESULTS ========== -->
-    <section class="results-section" id="results">
-      <div class="container">
-        <div class="results-grid">
-          <div class="results-image">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#A8B5C2" stroke-width="1"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          </div>
-          <div class="results-content">
-            <div class="section-label">
-              <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#A8B5C2"/></svg>
-              Performance
-            </div>
-            <h2 class="section-heading">Consistent returns in trending commodity markets</h2>
-            <p style="font-size:15px; color:#888; line-height:1.7;">
-              Backtested across 3+ years of data including the 2023-2026 gold supercycle. Forward-tested live since Q1 2025.
-            </p>
-            <div class="salary-bars">
-              <div class="salary-bar">
-                <div class="salary-bar-label">Avg. Monthly</div>
-                <div class="salary-bar-track"><div class="salary-bar-fill" style="width:62%"></div></div>
-                <div class="salary-bar-value">+8.2%</div>
-              </div>
-              <div class="salary-bar">
-                <div class="salary-bar-label">Best Month</div>
-                <div class="salary-bar-track"><div class="salary-bar-fill" style="width:88%"></div></div>
-                <div class="salary-bar-value">+22.1%</div>
-              </div>
-              <div class="salary-bar">
-                <div class="salary-bar-label">Max Drawdown</div>
-                <div class="salary-bar-track"><div class="salary-bar-fill" style="width:35%; background:#c0392b;"></div></div>
-                <div class="salary-bar-value">-11.3%</div>
-              </div>
-              <div class="salary-bar">
-                <div class="salary-bar-label">Sharpe Ratio</div>
-                <div class="salary-bar-track"><div class="salary-bar-fill" style="width:72%"></div></div>
-                <div class="salary-bar-value">1.87</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========== TESTIMONIALS ========== -->
-    <section class="testimonials-section" id="testimonials">
-      <div class="container text-center">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="#A8B5C2"/></svg>
-          Testimonials
-        </div>
-        <h2 class="section-heading">What traders are saying</h2>
-        <div class="testimonials-grid">
-          <div class="testimonial-card">
-            <svg class="quote-icon" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
-            <blockquote>"I was spending 6 hours a day staring at gold charts. Now I check my phone at breakfast. Last month the algo caught the silver breakout I would have slept through."</blockquote>
-            <div class="testimonial-author">
-              <div class="testimonial-avatar">MR</div>
-              <div>
-                <div class="testimonial-name">Mark R.</div>
-                <div class="testimonial-role">Commodities Trader, 4 years</div>
-              </div>
-            </div>
-          </div>
-          <div class="testimonial-card">
-            <svg class="quote-icon" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
-            <blockquote>"The risk management is what sold me. Every trade has a hard stop. I've never seen my account drop more than 11% from peak. That's unheard of in futures."</blockquote>
-            <div class="testimonial-author">
-              <div class="testimonial-avatar">SL</div>
-              <div>
-                <div class="testimonial-name">Sarah L.</div>
-                <div class="testimonial-role">Former Day Trader</div>
-              </div>
-            </div>
-          </div>
-          <div class="testimonial-card">
-            <svg class="quote-icon" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
-            <blockquote>"I run a full-time business. I don't have time to trade. This algo lets me participate in the gold and oil markets without sacrificing my day. Setup took 20 minutes."</blockquote>
-            <div class="testimonial-author">
-              <div class="testimonial-avatar">JT</div>
-              <div>
-                <div class="testimonial-name">James T.</div>
-                <div class="testimonial-role">Business Owner &amp; Investor</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========== PRICING ========== -->
-    <section class="pricing-section" id="pricing">
-      <div class="container">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" fill="#A8B5C2"/></svg>
-          Pricing
-        </div>
-        <h2 class="section-heading">Choose your plan</h2>
-        <p class="section-sub">
-          One algo. Three commodity markets. Cancel anytime.
-        </p>
-        <div class="pricing-grid">
-          <div class="pricing-card">
-            <div class="pricing-tier">Standard</div>
-            <div class="pricing-price">$297<span>/mo</span></div>
-            <p class="pricing-desc">Full access to the algo across all three commodity markets. Perfect for traders getting started with automation.</p>
-            <ul class="pricing-features">
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Gold, Silver &amp; Oil futures
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Automated 24/5 execution
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Real-time trade notifications
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Private community access
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                1-on-1 setup call
-              </li>
-            </ul>
-            <a href="#" class="btn-outline">
-              Get Started
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-          <div class="pricing-card featured">
-            <div class="pricing-tier">Pro</div>
-            <div class="pricing-price">$497<span>/mo</span></div>
-            <p class="pricing-desc">Everything in Standard plus micro contracts, priority support, and weekly strategy calls with the dev team.</p>
-            <ul class="pricing-features">
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Everything in Standard
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Micro contract support (MGC, SIL, MCL)
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Weekly strategy calls
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Priority Slack support
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                Custom risk configuration
-              </li>
-            </ul>
-            <a href="#" class="btn-primary">
-              Get Started
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========== FAQ ========== -->
-    <section class="faq-section" id="faq">
-      <div class="container text-center">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="#A8B5C2" stroke-width="1.5"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" fill="none" stroke="#A8B5C2" stroke-width="1.5"/><circle cx="12" cy="17" r="0.5" fill="#A8B5C2"/></svg>
-          FAQ
-        </div>
-        <h2 class="section-heading">Frequently Asked Questions</h2>
-        <p class="section-sub">
-          Everything you need to know before getting started.
-        </p>
-        <div class="faq-list" style="text-align:left;">
-          <div class="faq-item active">
-            <button class="faq-question">
-              What broker do I need?
-              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            </button>
-            <div class="faq-answer">
-              <p>Any NinjaTrader, Rithmic, or CQG-compatible broker. We recommend NinjaTrader with a Rithmic feed for the best execution. We'll help you set it up on your onboarding call.</p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-question">
-              What's the minimum account size?
-              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            </button>
-            <div class="faq-answer">
-              <p>We recommend a minimum of $25,000 for full-size contracts (GC, SI, CL). If you want to start smaller, the Pro plan includes micro contracts — you can run those with as little as $5,000.</p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-question">
-              How is risk managed?
-              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            </button>
-            <div class="faq-answer">
-              <p>Every trade has a hard stop loss. Position sizing is calculated based on your account size and risk tolerance. There's a daily max loss limit that shuts the algo down for the day if hit. You control all parameters.</p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-question">
-              Can I turn the algo off anytime?
-              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            </button>
-            <div class="faq-answer">
-              <p>Yes. You have full control. You can pause it, stop it, or adjust risk settings at any time. It runs on your machine or VPS — you always have the kill switch.</p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-question">
-              What if the market isn't trending?
-              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            </button>
-            <div class="faq-answer">
-              <p>The algo has built-in volatility filters. In choppy, range-bound markets, it reduces position sizes or sits out entirely. It's designed to make money in trends and preserve capital in chop.</p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-question">
-              Is there a refund policy?
-              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            </button>
-            <div class="faq-answer">
-              <p>Yes. If you're not satisfied within the first 14 days, we'll refund you in full — no questions asked. We're confident in the product and want you to be too.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========== FINAL CTA ========== -->
-    <section class="final-cta">
-      <div class="container">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#A8B5C2"/></svg>
-          Limited spots available
-        </div>
-        <h2 class="section-heading">Gold and silver aren't waiting.<br>Neither should you.</h2>
-        <p class="section-sub">
-          Join a small group of traders running an automated system built for the biggest commodity cycle in a decade.
-        </p>
-        <a href="#pricing" class="btn-primary" style="margin-top:20px;">
-          Get Started Now
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ========== FOOTER ========== -->
   <footer class="footer">
     <div class="container">
-      <div class="footer-top">
-        <div>
-          <div class="footer-brand">
-            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-            [Algo Name]
-          </div>
-          <p class="footer-tagline">Automated commodity futures trading. Gold. Silver. Oil.</p>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h2>COMMODITY ALPHA</h2>
+          <p>Institutional-grade futures automation for the modern commodity trader. Built for speed, precision, and risk management.</p>
         </div>
-        <div>
-          <h4>Links</h4>
-          <ul class="footer-links">
-            <li><a href="#how-it-works">How It Works</a></li>
-            <li><a href="#results">Results</a></li>
-            <li><a href="#testimonials">Testimonials</a></li>
-            <li><a href="#pricing">Pricing</a></li>
-            <li><a href="#faq">FAQ</a></li>
-          </ul>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul><li>Features</li><li>Strategy</li><li>Book a Demo</li></ul>
         </div>
-        <div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul><li>Performance</li><li>Blog</li><li>FAQ</li></ul>
+        </div>
+        <div class="footer-col">
           <h4>Legal</h4>
-          <ul class="footer-links">
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms of Service</a></li>
-            <li><a href="#">Risk Disclosure</a></li>
-          </ul>
+          <ul><li>Terms</li><li>Privacy</li><li>Risk Disclosure</li></ul>
         </div>
       </div>
       <div class="footer-bottom">
-        <span>&copy; 2026 [Algo Name]. All rights reserved.</span>
-        <div class="footer-legal">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
-        </div>
+        <div>&copy; 2026 Commodity Alpha. All rights reserved.</div>
+        <div>Futures trading involves risk. Only trade with risk capital.</div>
       </div>
-      <p style="margin-top:24px; font-size:11px; color:#444; line-height:1.6; max-width:800px;">
-        <strong style="color:#666;">Risk Disclosure:</strong> Futures trading involves substantial risk of loss and is not suitable for all investors. Past performance is not indicative of future results. The information on this page is for informational purposes only and should not be considered investment advice.
-      </p>
     </div>
   </footer>
 
   <script>
-    // FAQ Accordion
-    document.querySelectorAll('.faq-question').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const item = btn.parentElement;
-        const isActive = item.classList.contains('active');
-        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
-        if (!isActive) item.classList.add('active');
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
       });
     });
 
-    // Navbar scroll effect
-    const navbar = document.querySelector('.navbar');
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 100) {
-        navbar.style.background = 'rgba(40, 40, 40, 0.75)';
-      } else {
-        navbar.style.background = 'rgba(51, 51, 51, 0.6)';
-      }
-    });
   </script>
 
 </body>
